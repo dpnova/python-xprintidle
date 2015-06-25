@@ -12,8 +12,12 @@ import xprintidle
 print xprintidle.idle_time()
 ```
 
-Requires:
+## Requires
 
 * libX11
 * libXss
 * a c compiler and python dev headers
+
+## Installation
+
+`pip install xprintidle`
