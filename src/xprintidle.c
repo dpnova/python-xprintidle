@@ -39,7 +39,7 @@ the GNU GPL, version 2 _only_.
 #include <time.h>
 
 void usage(char *name);
-int print_idle();
+unsigned long idle_time();
 unsigned long workaroundCreepyXServer(Display *dpy, unsigned long _idleTime );
 static void signal_callback_handler(int sig, siginfo_t *siginfo, void *context);
 

@@ -1,1 +1,2 @@
-include xprintidle.c
+include src/xprintidle.c
+include README.md
