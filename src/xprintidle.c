@@ -35,72 +35,39 @@ the GNU GPL, version 2 _only_.
 #include <X11/extensions/scrnsaver.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <signal.h>
 #include <time.h>
 
 void usage(char *name);
 unsigned long idle_time();
 unsigned long workaroundCreepyXServer(Display *dpy, unsigned long _idleTime );
-static void signal_callback_handler(int sig, siginfo_t *siginfo, void *context);
-
-Display *dpy;
 
 unsigned long idle_time()
 {
   XScreenSaverInfo ssi;
-//  Display *dpy;
   int event_basep, error_basep;
+  Display *dpy;
+  unsigned long idle_time_ms; /* Idle time in milliseconds */
 
   dpy = XOpenDisplay(NULL);
   if (dpy == NULL) {
     fprintf(stderr, "couldn't open display\n");
     return 1;
   }
-  
-  struct sigaction act;
-  memset (&act, '\0', sizeof(act));
- 
-  /* Use the sa_sigaction field because the handles has two additional parameters */
-  act.sa_sigaction = &signal_callback_handler;
-         
-  /* The SA_SIGINFO flag tells sigaction() to use the sa_sigaction field, not sa_handler. */
-  act.sa_flags = SA_SIGINFO;
-             
-  // Register signal and signal handler
-  if (sigaction(SIGTERM, &act, NULL) < 0) {
-    perror ("sigaction");
-    return 1;
-  }
 
-  setlinebuf(stdout);
-
-      
-    if (!XScreenSaverQueryExtension(dpy, &event_basep, &error_basep)) {
+  if (!XScreenSaverQueryExtension(dpy, &event_basep, &error_basep)) {
       fprintf(stderr, "screen saver extension not supported\n");
       return 1;
-    }
-  
-    if (!XScreenSaverQueryInfo(dpy, DefaultRootWindow(dpy), &ssi)) {
+  }
+
+  if (!XScreenSaverQueryInfo(dpy, DefaultRootWindow(dpy), &ssi)) {
       fprintf(stderr, "couldn't query screen saver info\n");
       return 1;
-    }
+  }
 
-  return workaroundCreepyXServer(dpy, ssi.idle);
-  
-}
+  idle_time_ms = workaroundCreepyXServer(dpy, ssi.idle);
 
-static void signal_callback_handler(int sig, siginfo_t *siginfo, void *context) {
   XCloseDisplay(dpy);
-}
-
-void usage(char *name)
-{
-  fprintf(stderr,
-      "Usage:\n"
-      "%s\n"
-      "That is, no command line arguments.  The user's idle time\n"
-      "in milliseconds is printed on stdout.\n",
-      name);
+  return idle_time_ms;
 }
 
 /*!
@@ -112,8 +79,8 @@ void usage(char *name)
  * This result in SUSE bug # and sf.net bug #. The bug in the XServer itself
  * is reported at https://bugs.freedesktop.org/buglist.cgi?quicksearch=6439.
  *
- * Workaround: Check if if XServer is in a dpms state, check the 
- *             current timeout for this state and add this value to 
+ * Workaround: Check if if XServer is in a dpms state, check the
+ *             current timeout for this state and add this value to
  *             the current idle time and return.
  *
  * \param _idleTime a unsigned long value with the current idletime from
