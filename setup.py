@@ -27,7 +27,7 @@ class CFFIInstall(install):
 
 setup(
     name="xprintidle",
-    version="0.2a2",
+    version="0.2",
     description="A cffi wrapper around xprintidle.",
     author="David P. Novakovic",
     author_email="davidnovakovic@gmail.com",
